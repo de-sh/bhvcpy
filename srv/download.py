@@ -1,8 +1,10 @@
 import requests
 import zipfile
-import csv 
+import csv
+import datetime
 
-def download_bhavcopy(date):
+def daily_bhavcopy():
+    date = datetime.date.today().strftime("%d%m%y")
     hdr = {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -34,5 +36,3 @@ def download_bhavcopy(date):
                 code, name, opn, high, low, close = row[0], row[1], row[4], row[5], row[6], row[7]
                 print(code, name, opn, high, low, close)
 
-
-download_bhavcopy('030221')

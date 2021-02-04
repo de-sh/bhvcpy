@@ -8,6 +8,9 @@ django = "*"
 redis = "*"
 requests = "*"
 django-redis = "*"
+pytz = "*"
+apscheduler = "*"
+django-apscheduler = "*"
 
 [dev-packages]
 
