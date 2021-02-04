@@ -25,10 +25,14 @@ def download_bhavcopy(date):
 
     with open(f'EQ{date}.CSV', 'r') as csv_file:
         csv_reader = csv.reader(csv_file)
+        first = True
 
         for row in csv_reader:
-            code, name, opn, high, low, close = row[0], row[1], row[4], row[5], row[6], row[7]
-            print(code, name, opn, high, low, close)
+            if first:
+                first = False
+            else:
+                code, name, opn, high, low, close = row[0], row[1], row[4], row[5], row[6], row[7]
+                print(code, name, opn, high, low, close)
 
 
 download_bhavcopy('030221')

@@ -1,4 +1,4 @@
-function getEntries() {
+function getEntries(url, method, data) {
     return axios({
         method: method,
         url: url,
@@ -14,22 +14,22 @@ function getEntries() {
 var app = new Vue({
     el: '#app',
     data: {
-        key: 'Search',
+        keyword: '',
         entries: [
-            {code: 'abc', name: 'ABC', open: 123, high: 456, low: 0, close: 200}
+            { code: 'abc', name: 'ABC', open: 123, high: 456, low: 0, close: 200 },
+            { code: 'abc', name: 'XYZ', open: 123, high: 456, low: 0, close: 200 }
         ]
     },
     created() {
-        let hd = this;
-        getEntries('', 'get').then((res) => {
-            hd.entries = response.data.entries
+        let r = getEntries('', 'get', '').then((res) => {
+            this.entries = res.data.entries
         });
     },
-    methods: {
-        filterEntries() {
-            let hd = this;
-            let formData = new FormData();
-            formData.append('title', this.search)
+    computed: {
+        filteredEntries() {
+            return this.entries.filter(entry => {
+                entry.name.toLowerCase().match(this.keyword.toLowerCase())
+            })
         }
     }
 })
