@@ -1,0 +1,26 @@
+* {
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+}
+
+#app {
+    width: 100%;
+}
+
+table {
+    margin: auto 10%;
+    max-width: 80%;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    right: 45%;
+}
+
+.input-group {
+    max-width: 50%;
+    margin: auto;
+    margin-top: 5em;
+}

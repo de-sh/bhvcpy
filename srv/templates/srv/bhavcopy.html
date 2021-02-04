@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+{% verbatim %}
+
+<div id="app" class="container-fluid">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Search">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </div>
+    
+
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Code</th>
+                <th scope="col">Name</th>
+                <th scope="col">Open</th>
+                <th scope="col">High</th>
+                <th scope="col">Low</th>
+                <th scope="col">Close</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="entry in entries">
+                <th scope="row">{{ entry.code }}</td>
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.open }}</td>
+                <td>{{ entry.high }}</td>
+                <td>{{ entry.low }}</td>
+                <td>{{ entry.close }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+    
+{% endverbatim %}
+<footer class="text-center">Copyright: Devdutt Shenoi Version: {{ version }}</footer>
+{% endblock %}
