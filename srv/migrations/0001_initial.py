@@ -7,20 +7,27 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Srv',
+            name="Srv",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=50)),
-                ('name', models.CharField(max_length=100)),
-                ('open', models.FloatField()),
-                ('high', models.FloatField()),
-                ('low', models.FloatField()),
-                ('close', models.FloatField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=50)),
+                ("name", models.CharField(max_length=100)),
+                ("open", models.FloatField()),
+                ("high", models.FloatField()),
+                ("low", models.FloatField()),
+                ("close", models.FloatField()),
             ],
         ),
     ]

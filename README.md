@@ -22,9 +22,17 @@ pipenv shell
 python manage.py makemigrations
 python manage.py migrate
 ```
-4. Run server.
+4. Run redis and django server simulataneously on local.
 ```
+redis-server &
 python manage.py runserver
 ```
 5. Visit url provided by django cli and interact with website.
 6. Close django cli and pipenv shell.
+
+### Redis schema
+- "codes": List of unique code for each and every scrip traded on the market.
+- "open", "high", "low", "close": Also insert ordered listing scrip details.
+
+## Possible Optimization
+I believe the application presented in this repository is extremely crude and could require optimizations such as streaming of csv data as small packets.

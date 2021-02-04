@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-from .models import Srv
+""" from .models import Srv
 
-admin.site.register(Srv)
+admin.site.register(Srv) """

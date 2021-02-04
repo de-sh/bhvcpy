@@ -9,16 +9,17 @@ from django.conf import settings
 
 from .download import daily_bhavcopy
 
+
 def start():
     if settings.DEBUG:
         logging.basicConfig()
-        logging.getLogger('apscheduler').setLevel(logging.DEBUG)
+        logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
     # Create background scheduler on IST
     scheduler = BackgroundScheduler()
-    scheduler.configure(timezone=timezone('Asia/Kolkata'))
+    scheduler.configure(timezone=timezone("Asia/Kolkata"))
 
     # Run daily(best case: only on market days), at 6PM
-    scheduler.add_job(daily_bhavcopy, 'cron', id="daily_bhavcopy", hour=18)
+    scheduler.add_job(daily_bhavcopy, "cron", id="daily_bhavcopy", hour=18)
     register_events(scheduler)
     scheduler.start()
