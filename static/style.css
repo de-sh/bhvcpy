@@ -14,8 +14,7 @@ table {
 }
 
 footer {
-    position: static;
-    padding: 1em 0;
+    margin: 1em 0;
     width: 100vw;
 }
 
@@ -26,5 +25,5 @@ footer {
 }
 
 #download {
-    margin-top: 1em;
+    margin: 1em 0;
 }
