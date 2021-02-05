@@ -31,16 +31,18 @@ def daily_bhavcopy():
 
     with open(f"EQ{date}.CSV", "r") as csv_file:
         csv_reader = csv.reader(csv_file)
-        first = True
+        count = 0
         r = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
         for row in csv_reader:
-            if first:
-                first = False
-            else:
-                r.lpush("code", row[0])
-                r.lpush("name", row[1])
-                r.lpush("open", row[4])
-                r.lpush("high", row[5])
-                r.lpush("low", row[6])
-                r.lpush("close", row[7])
+            if count!=0:
+                r.lpush("code", row[0].strip())
+                r.lpush("name", row[1].strip())
+                r.lpush("open", row[4].strip())
+                r.lpush("high", row[5].strip())
+                r.lpush("low", row[6].strip())
+                r.lpush("close", row[7].strip())
+            
+            count+=1
+
+        r.lpush("daily_len", count)

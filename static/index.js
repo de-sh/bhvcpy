@@ -16,8 +16,7 @@ var app = new Vue({
     data: {
         keyword: '',
         entries: [
-            { code: 'abc', name: 'ABC', open: 123, high: 456, low: 0, close: 200 },
-            { code: 'abc', name: 'XYZ', open: 123, high: 456, low: 0, close: 200 }
+            { code: 'LOADING', name: 'LOADING', open: 'LOADING', high: 'LOADING', low: 'LOADING', close:  'LOADING'},
         ]
     },
     created() {
@@ -28,8 +27,28 @@ var app = new Vue({
     computed: {
         filteredEntries() {
             return this.entries.filter(entry => {
-                entry.name.toLowerCase().match(this.keyword.toLowerCase())
+                return entry.name.toLowerCase().includes(this.keyword.toLowerCase())
             })
+        }
+    },
+    methods: {
+        downloadCsv() {
+            const items = this.entries;
+            const replacer = (_, value) => value === null ? '' : value;
+            const header = Object.keys(items[0]);
+            const csv = [
+                header.join(','),
+                ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(', '))
+            ].join('\r\n');
+
+            let element = document.createElement('a');
+            element.style.display = 'none';
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+            element.setAttribute('download', 'output.csv');
+            
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
         }
     }
 })

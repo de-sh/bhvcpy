@@ -11,7 +11,12 @@
             </button>
         </div>
     </div>
-    
+    <div id="download" class="text-center">
+        <button v-on:click="downloadCsv" class="btn btn-outline-secondary" type="button">
+            <i class="bi bi-download"></i>
+            Download CSV
+        </button>
+    </div>
 
     <table class="table table-dark table-striped">
         <thead>
@@ -25,7 +30,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="entry in entries">
+            <tr v-for="entry in filteredEntries">
                 <th scope="row">{{ entry.code }}</td>
                 <td>{{ entry.name }}</td>
                 <td>{{ entry.open }}</td>
@@ -38,5 +43,5 @@
 </div>
     
 {% endverbatim %}
-<footer class="text-center">Copyright: Devdutt Shenoi Version: {{ version }}</footer>
+<footer>Copyright: Devdutt Shenoi Version: {{ version }}</footer>
 {% endblock %}

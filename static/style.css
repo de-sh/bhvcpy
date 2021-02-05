@@ -14,13 +14,17 @@ table {
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    right: 45%;
+    position: static;
+    padding: 1em 0;
+    width: 100vw;
 }
 
 .input-group {
     max-width: 50%;
     margin: auto;
     margin-top: 5em;
+}
+
+#download {
+    margin-top: 1em;
 }
