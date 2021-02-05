@@ -33,7 +33,7 @@ var app = new Vue({
     },
     methods: {
         downloadCsv() {
-            const items = this.entries;
+            const items = this.filteredEntries;
             const replacer = (_, value) => value === null ? '' : value;
             const header = Object.keys(items[0]);
             const csv = [
