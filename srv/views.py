@@ -25,8 +25,8 @@ class SrView(View):
                     "low": float(self.redis.lindex("low", i)),
                     "close": float(self.redis.lindex("close", i)),
                 }
-                for i in range(0, int(self.redis.lindex("daily_len", 0)))
-            ][::-1]
+                for i in range(int(self.redis.lindex("daily_len", 0))-1, -1, -1)
+            ]
             return JsonResponse({"entries": entries}, status=200)
 
         return render(request, "srv/bhavcopy.html", context={"version": "0.0.1"})
