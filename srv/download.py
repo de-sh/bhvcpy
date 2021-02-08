@@ -27,9 +27,25 @@ class DownloadCSV:
                     datetime.datetime.strptime(holiday[4].text[5:16], "%d %b %Y").date()
                 )
 
-    def push(self, key, value):
-        self.r.lpush(key, value)
+    # Push latest copy of Bhavcopy into redis
+    def push(self, values):
+        self.r.lpush("code", values[0].strip())
+        self.r.lpush("name", values[1].strip())
+        self.r.lpush("open", values[4].strip())
+        self.r.lpush("high", values[5].strip())
+        self.r.lpush("low", values[6].strip())
+        self.r.lpush("close", values[7].strip())
 
+    # Clear last Bhavcopy from Redis
+    def clear(self):
+        self.r.delete("code")
+        self.r.delete("name")
+        self.r.delete("open")
+        self.r.delete("high")
+        self.r.delete("low")
+        self.r.delete("close")
+
+    # Download latest Bhavcopy and extract into Redis
     def daily_bhavcopy(self):
         date = datetime.date.today()
         # Exit without downloading if today is a holiday or Sat/Sunday
@@ -62,14 +78,10 @@ class DownloadCSV:
         with open(f"EQ{date_str}.CSV", "r") as csv_file:
             csv_reader = csv.reader(csv_file)
             first = True
+            self.clear()
 
             for row in csv_reader:
                 if not first:
-                    self.push("code", row[0].strip())
-                    self.push("name", row[1].strip())
-                    self.push("open", row[4].strip())
-                    self.push("high", row[5].strip())
-                    self.push("low", row[6].strip())
-                    self.push("close", row[7].strip())
+                    self.push(row)
                 else:
                     first = False
