@@ -25,7 +25,7 @@ class SrView(View):
                     "low": float(self.redis.lindex("low", i)),
                     "close": float(self.redis.lindex("close", i)),
                 }
-                for i in range(int(self.redis.lindex("daily_len", 0))-1, -1, -1)
+                for i in range(int(self.redis.llen("code"))-1, -1, -1)
             ]
             return JsonResponse({"entries": entries}, status=200)
 

@@ -7,7 +7,7 @@ from pytz import timezone
 
 from django.conf import settings
 
-from .download import daily_bhavcopy
+from .download import DownloadCSV
 
 
 def start():
@@ -19,7 +19,9 @@ def start():
     scheduler = BackgroundScheduler()
     scheduler.configure(timezone=timezone("Asia/Kolkata"))
 
+    downloader = DownloadCSV()
+
     # Run daily(best case: only on market days), at 6PM
-    scheduler.add_job(daily_bhavcopy, "cron", id="daily_bhavcopy", hour=18)
+    scheduler.add_job(downloader.daily_bhavcopy, "cron", id="daily_bhavcopy", hour=18)
     register_events(scheduler)
     scheduler.start()
