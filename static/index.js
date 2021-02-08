@@ -39,7 +39,7 @@ var app = new Vue({
             const csv = [
                 header.join(','),
                 ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(', '))
-            ].join('\r\n');
+            ].join('\r\n').replace(/['"]+/g, '');
 
             let element = document.createElement('a');
             element.style.display = 'none';
