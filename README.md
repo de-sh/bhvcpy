@@ -12,23 +12,18 @@
     - [ ] Add filtered searching ability to app
 
 ### Installation
-1. Install python, pip, pipenv as pre-requisites
-2. Install django and other project specific requirements with pipenv from within project directory and enter shell.
+1. Install docker, redis-server and other pre-requisites
+2. Build docker image
 ```
-pipenv shell
+docker build -t bhvcpy .
 ```
-3. Make django migrations done.
-```
-python manage.py makemigrations
-python manage.py migrate
-```
-4. Run redis and django server simulataneously on local.
+4. Run redis and web server(docker image) simulataneously. Redis should be accessible at localhost:6379.
 ```
 redis-server &
-python manage.py runserver
+docker run --net=host -d -p 8000:8000 bhvcpy:latest
 ```
-5. Visit url provided by django cli and interact with website.
-6. Close django cli and pipenv shell.
+5. Visit url provided by django cli and interact with website. This might be empty if redis hasn't been updated by Bhavcopy downloader.
+6. Close docker and redis instances.
 
 ### Redis schema
 - "codes": List of unique code for each and every scrip traded on the market.
