@@ -20,12 +20,12 @@ class SrView(View):
                 {
                     "code": str(self.redis.lindex("code", i)),
                     "name": str(self.redis.lindex("name", i)),
-                    "open": float(self.redis.lindex("open", i)),
-                    "high": float(self.redis.lindex("high", i)),
-                    "low": float(self.redis.lindex("low", i)),
-                    "close": float(self.redis.lindex("close", i)),
+                    "open": str(self.redis.lindex("open", i)),
+                    "high": str(self.redis.lindex("high", i)),
+                    "low": str(self.redis.lindex("low", i)),
+                    "close": str(self.redis.lindex("close", i)),
                 }
-                for i in range(int(self.redis.llen("code"))-1, -1, -1)
+                for i in range(int(self.redis.llen("open"))-1, -1, -1)
             ]
             return JsonResponse({"entries": entries}, status=200)
 

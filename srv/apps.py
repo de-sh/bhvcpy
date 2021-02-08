@@ -1,11 +1,11 @@
 from django.apps import AppConfig
 from django.conf import settings
-from . import scheduler
 
 
 class SrvConfig(AppConfig):
     name = "srv"
 
-    def read(self):
+    def ready(self):
+        from . import scheduler
         if settings.SCHEDULER_AUTOSTART:
             scheduler.start()
