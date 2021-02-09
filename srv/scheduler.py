@@ -1,8 +1,7 @@
 import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.executors.pool import ProcessPoolExecutor, ThreadPoolExecutor
-from django_apscheduler.jobstores import register_events, register_job
+from django_apscheduler.jobstores import register_events
 from pytz import timezone
 
 from django.conf import settings

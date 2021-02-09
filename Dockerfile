@@ -15,4 +15,4 @@ COPY ./manage.py ./
 
 EXPOSE 8000
 
-CMD ["python3.8", "manage.py", "runserver"]
+CMD ["python3.8", "manage.py", "runserver", "--noreload"]
