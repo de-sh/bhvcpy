@@ -22,7 +22,7 @@ docker build -t bhvcpy .
 redis-server &
 docker run --net=host -d -p 8000:8000 bhvcpy:latest
 ```
-5. Visit url provided by django cli and interact with website. This might be empty if redis hasn't been updated by Bhavcopy downloader.
+5. Visit http://localhost:8000 and interact with website. This might be empty if redis hasn't been updated by Bhavcopy downloader.
 6. Close docker and redis instances.
 
 ### Redis schema
