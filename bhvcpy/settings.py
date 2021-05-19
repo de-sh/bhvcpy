@@ -19,10 +19,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-DEBUG=True
+# TODO: this should be False and still work.
+DEBUG = True
 SECRET_KEY = os.environ['SECRET_KEY']
 
-ALLOWED_HOSTS = ['13.233.91.216', 'ec2-13-233-91-216.ap-south-1.compute.amazonaws.com']
+ALLOWED_HOSTS = [
+    '13.233.91.216',
+    'ec2-13-233-91-216.ap-south-1.compute.amazonaws.com',
+    '0.0.0.0',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -134,8 +140,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-            os.path.join(BASE_DIR, 'static')
-            ]
+    os.path.join(BASE_DIR, 'static')
+]
 STATIC_ROOT = '/var/www/bhavco.py/static'
 
 MEDIA_URL = '/media/'
