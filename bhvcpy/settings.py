@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,14 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
+DEBUG=True
+SECRET_KEY = os.environ['SECRET_KEY']
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "v4)oy&octef9h9n4*$pad_k_59a@onkdv&vs7afth0(lm_k&7="
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['13.233.91.216', 'ec2-13-233-91-216.ap-south-1.compute.amazonaws.com']
 
 
 # Application definition
@@ -135,8 +132,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = "/static/"
-
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+            os.path.join(BASE_DIR, 'static')
+            ]
+STATIC_ROOT = '/var/www/bhavco.py/static'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
