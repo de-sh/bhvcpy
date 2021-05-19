@@ -5,15 +5,11 @@ import datetime
 import redis
 import xml.etree.ElementTree as ET
 
-from django.conf import settings
-
 
 class DownloadCSV:
-    def __init__(self):
+    def __init__(self, host, port, db=0):
         # Redis connection to access DB
-        self.r = redis.StrictRedis(
-            host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0
-        )
+        self.r = redis.StrictRedis(host, port, db)
         # List of date when holiday
         self.holidays = []
 
@@ -24,7 +20,8 @@ class DownloadCSV:
             root = ET.fromstring(days.content)
             for holiday in root[0][5:]:
                 self.holidays.append(
-                    datetime.datetime.strptime(holiday[4].text[5:16], "%d %b %Y").date()
+                    datetime.datetime.strptime(
+                        holiday[4].text[5:16], "%d %b %Y").date()
                 )
 
     # Push latest copy of Bhavcopy into redis
@@ -45,9 +42,11 @@ class DownloadCSV:
         self.r.delete("low")
         self.r.delete("close")
 
-    # Download latest Bhavcopy and extract into Redis
     def daily_bhavcopy(self):
-        date = datetime.date.today()
+        self.bhvcpy_downloader(datetime.date.today())
+
+    # Download latest Bhavcopy and extract into Redis
+    def bhvcpy_downloader(self, date):
         # Exit without downloading if today is a holiday or Sat/Sunday
         if date in self.holidays:
             return

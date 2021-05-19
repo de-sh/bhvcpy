@@ -18,9 +18,10 @@ def start():
     scheduler = BackgroundScheduler()
     scheduler.configure(timezone=timezone("Asia/Kolkata"))
 
-    downloader = DownloadCSV()
+    downloader = DownloadCSV(settings.REDIS_HOST, settings.REDIS_PORT, db=0)
 
     # Run daily(best case: only on market days), at 6PM
-    scheduler.add_job(downloader.daily_bhavcopy, "cron", id="daily_bhavcopy", hour=18)
+    scheduler.add_job(downloader.daily_bhavcopy, "cron",
+                      id="daily_bhavcopy", hour=18)
     register_events(scheduler)
     scheduler.start()
