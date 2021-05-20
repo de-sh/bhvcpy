@@ -3,6 +3,7 @@ from django.views.generic import View
 from django.http import JsonResponse
 from django.conf import settings
 import redis
+import json
 
 
 class SrView(View):
@@ -16,17 +17,12 @@ class SrView(View):
 
     def get(self, request):
         if request.is_ajax():
-            entries = [
-                {
-                    "code": str(self.redis.lindex("code", i)),
-                    "name": str(self.redis.lindex("name", i)),
-                    "open": str(self.redis.lindex("open", i)),
-                    "high": str(self.redis.lindex("high", i)),
-                    "low": str(self.redis.lindex("low", i)),
-                    "close": str(self.redis.lindex("close", i)),
-                }
-                for i in range(int(self.redis.llen("open"))-1, -1, -1)
-            ]
+            names = [str(self.redis.lindex("name", i))
+                     for i in range(int(self.redis.llen("name"))-1, -1, -1)]
+            if "key" in request.GET:
+                key = request.GET["key"].upper()
+                names = list(filter(lambda x: x.find(key) != -1, names))
+            entries = [self.redis.hgetall(name) for name in names]
             return JsonResponse({"entries": entries}, status=200)
 
         return render(request, "srv/bhavcopy.html", context={"version": "0.0.1"})

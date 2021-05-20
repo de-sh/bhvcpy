@@ -26,21 +26,23 @@ class DownloadCSV:
 
     # Push latest copy of Bhavcopy into redis
     def push(self, pipe, values):
-        pipe.lpush("code", values[0].strip())
         pipe.lpush("name", values[1].strip())
-        pipe.lpush("open", values[4].strip())
-        pipe.lpush("high", values[5].strip())
-        pipe.lpush("low", values[6].strip())
-        pipe.lpush("close", values[7].strip())
+        pipe.hmset(values[1].strip(), {
+            "code": values[0].strip(),
+            "name": values[1].strip(),
+            "open": values[4].strip(),
+            "high": values[5].strip(),
+            "low": values[6].strip(),
+            "close": values[7].strip()
+        })
 
     # Clear last Bhavcopy from Redis
     def clear(self, pipe):
-        pipe.delete("code")
+        names = [self.redis.lindex("name", i)
+                 for i in range(int(self.redis.llen("name")))]
         pipe.delete("name")
-        pipe.delete("open")
-        pipe.delete("high")
-        pipe.delete("low")
-        pipe.delete("close")
+        for name in names:
+            pipe.delete(name)
 
     def daily_bhavcopy(self):
         self.bhvcpy_downloader(datetime.date.today())
