@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 class DownloadCSV:
     def __init__(self, host, port, db=0):
         # Redis connection to access DB
-        self.r = redis.StrictRedis(host, port, db)
+        self.redis = redis.StrictRedis(host, port, db)
         # List of date when holiday
         self.holidays = []
 
@@ -25,22 +25,22 @@ class DownloadCSV:
                 )
 
     # Push latest copy of Bhavcopy into redis
-    def push(self, values):
-        self.r.lpush("code", values[0].strip())
-        self.r.lpush("name", values[1].strip())
-        self.r.lpush("open", values[4].strip())
-        self.r.lpush("high", values[5].strip())
-        self.r.lpush("low", values[6].strip())
-        self.r.lpush("close", values[7].strip())
+    def push(self, pipe, values):
+        pipe.lpush("code", values[0].strip())
+        pipe.lpush("name", values[1].strip())
+        pipe.lpush("open", values[4].strip())
+        pipe.lpush("high", values[5].strip())
+        pipe.lpush("low", values[6].strip())
+        pipe.lpush("close", values[7].strip())
 
     # Clear last Bhavcopy from Redis
-    def clear(self):
-        self.r.delete("code")
-        self.r.delete("name")
-        self.r.delete("open")
-        self.r.delete("high")
-        self.r.delete("low")
-        self.r.delete("close")
+    def clear(self, pipe):
+        pipe.delete("code")
+        pipe.delete("name")
+        pipe.delete("open")
+        pipe.delete("high")
+        pipe.delete("low")
+        pipe.delete("close")
 
     def daily_bhavcopy(self):
         self.bhvcpy_downloader(datetime.date.today())
@@ -77,10 +77,13 @@ class DownloadCSV:
         with open(f"EQ{date_str}.CSV", "r") as csv_file:
             csv_reader = csv.reader(csv_file)
             first = True
-            self.clear()
+            pipe = self.redis.pipeline()
+            self.clear(pipe)
 
             for row in csv_reader:
                 if not first:
-                    self.push(row)
+                    self.push(pipe, row)
                 else:
                     first = False
+
+            pipe.execute()
