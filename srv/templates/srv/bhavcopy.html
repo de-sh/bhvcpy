@@ -4,9 +4,9 @@
 
 <div id="app" class="container-fluid">
     <div class="input-group mb-3">
-        <input type="text" v-model="keyword" class="form-control" placeholder="Search">
+        <input @keyup.enter="backendSearch" type="text" v-model="keyword" class="form-control" placeholder="Search">
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button">
+            <button v-on:click="backendSearch" class="btn btn-outline-secondary" type="button">
                 <i class="bi bi-search"></i>
             </button>
         </div>
@@ -41,7 +41,7 @@
         </tbody>
     </table>
 </div>
-    
+
 {% endverbatim %}
 <footer class="text-center">Copyright: Devdutt Shenoi Version: {{ version }}</footer>
 {% endblock %}

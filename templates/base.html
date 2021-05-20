@@ -59,8 +59,8 @@
     {% endblock %}
 
     <script>
-        function getEntries(url, method, data) {
-            return axios({
+        async function getEntries(url, method, data) {
+            return await axios({
                 method: method,
                 url: url,
                 data: data,
@@ -86,20 +86,23 @@
                 }, ]
             },
             created() {
-                let r = getEntries('', 'get', '').then((res) => {
-                    this.entries = res.data.entries
+                getEntries('', 'get', '').then((res) => {
+                    this.entries = res.data.entries;
                 });
             },
             computed: {
                 filteredEntries() {
-                    return this.entries.filter(entry => {
-                        return entry.name.toLowerCase().includes(this.keyword.toLowerCase())
-                    })
+                    return this.entries;
                 }
             },
             methods: {
+                backendSearch() {
+                    getEntries('/?key='+this.keyword, 'get', '').then((res) => {
+                        this.entries = res.data.entries;
+                    });
+                },
                 downloadCsv() {
-                    const items = this.filteredEntries;
+                    const items = this.entries;
                     const replacer = (_, value) => value === null ? '' : value;
                     const header = Object.keys(items[0]);
                     const csv = [
