@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -53,11 +52,47 @@
 </head>
 
 <body>
+    <div id="app" class="container-fluid">
+        <div class="input-group mb-3">
+            <input @keyup.enter="backendSearch" type="text" v-model="keyword" class="form-control" placeholder="Search">
+            <div class="input-group-append">
+                <button v-on:click="backendSearch" class="btn btn-outline-secondary" type="button">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+        <div id="download" class="text-center">
+            <button v-on:click="downloadCsv" class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-download"></i>
+                Download CSV
+            </button>
+        </div>
+    
+        <table class="table table-dark table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Code</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Open</th>
+                    <th scope="col">High</th>
+                    <th scope="col">Low</th>
+                    <th scope="col">Close</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="entry in filteredEntries">
+                    <th scope="row">{{ entry.code }}</td>
+                    <td>{{ entry.name }}</td>
+                    <td>{{ entry.open }}</td>
+                    <td>{{ entry.high }}</td>
+                    <td>{{ entry.low }}</td>
+                    <td>{{ entry.close }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    {% block content %}
-
-    {% endblock %}
-
+    <footer class="text-center">Copyright: Devdutt Shenoi Version: 0.0.1</footer>
     <script>
         async function getEntries(url, method, data) {
             return await axios({
@@ -86,7 +121,7 @@
                 }, ]
             },
             created() {
-                getEntries('', 'get', '').then((res) => {
+                getEntries('/get', 'get', '').then((res) => {
                     this.entries = res.data.entries;
                 });
             },
@@ -97,7 +132,7 @@
             },
             methods: {
                 backendSearch() {
-                    getEntries('/?key='+this.keyword, 'get', '').then((res) => {
+                    getEntries('/get?key='+this.keyword, 'get', '').then((res) => {
                         this.entries = res.data.entries;
                     });
                 },
