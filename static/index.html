@@ -121,7 +121,7 @@
                 }, ]
             },
             created() {
-                getEntries('/get', 'get', '').then((res) => {
+                getEntries('/get?key=', 'get', '').then((res) => {
                     this.entries = res.data.entries;
                 });
             },

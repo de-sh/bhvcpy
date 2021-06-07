@@ -14,45 +14,44 @@ import (
 var ctx = context.Background()
 
 func queryRedis(w http.ResponseWriter, r *http.Request) {
-	if key := strings.ToUpper(r.URL.Query().Get("key")); key != "" {
-		// Connect to redis instance
-		conn := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
+	key := strings.ToUpper(r.URL.Query().Get("key"))
+	// Connect to redis instance
+	conn := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
 
-		// Find length of list
-		nos, err := conn.LLen(ctx, "name").Result()
+	// Find length of list
+	nos, err := conn.LLen(ctx, "name").Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Recieve names
+	var names []string
+	for code := nos - 1; code >= 0; code-- {
+		name, err := conn.LIndex(ctx, "name", code).Result()
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			if strings.Contains(name, key) {
+				names = append(names, name)
+			}
+		}
+	}
+
+	// Recieve entries associated with selected names
+	var entries []map[string]string
+	for _, name := range names {
+		entry, err := conn.HGetAll(ctx, name).Result()
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// Recieve names
-		var names []string
-		for code := nos - 1; code >= 0; code-- {
-			name, err := conn.LIndex(ctx, "name", code).Result()
-			if err != nil {
-				log.Fatal(err)
-			} else {
-				if strings.Contains(name, key) {
-					names = append(names, name)
-				}
-			}
-		}
-
-		// Recieve entries associated with selected names
-		var entries []map[string]string
-		for _, name := range names {
-			entry, err := conn.HGetAll(ctx, name).Result()
-			if err != nil {
-				log.Fatal(err)
-			}
-			entries = append(entries, entry)
-		}
-
-		out := make(map[string][]map[string]string)
-		out["entries"] = entries
-		jsonString, _ := json.Marshal(out)
-
-		w.Write([]byte(jsonString))
+		entries = append(entries, entry)
 	}
+
+	out := make(map[string][]map[string]string)
+	out["entries"] = entries
+	jsonString, _ := json.Marshal(out)
+
+	w.Write([]byte(jsonString))
 }
 
 func main() {
