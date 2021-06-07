@@ -86,7 +86,7 @@ func (d *DownloadCSV) BhvcpyDownloader(date time.Time) {
 	}
 
 	// Download Zip into 'tmp.zip' file
-	date_str := date.Format("%d%m%y")
+	date_str := date.Format("02012006")
 	file_str := "EQ" + date_str
 	url := "https://www.bseindia.com/download/BhavCopy/Equity/" + file_str + ".ZIP"
 	r, err := http.Get(url)
