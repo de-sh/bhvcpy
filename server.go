@@ -61,10 +61,9 @@ func queryRedis(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Create a new BhavCopy extraction cron job to run at 6PM Mon-Fri
 	c := cron.New()
-	d := utils.NewDownloader("localhost:6379")
+	d := utils.NewExtractor("localhost:6379")
 	c.AddFunc("0 18 1-5 * *", func() {
-		t, _ := time.Parse("Jan 2, 2006 at 3:04pm (MST)", "Jun 07, 2021 at 6:00pm (IST)")
-		d.BhvcpyDownloader(t)
+		d.BhvcpyDownloader(time.Now())
 	})
 	c.Start()
 	defer c.Stop()

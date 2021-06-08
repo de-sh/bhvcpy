@@ -18,18 +18,55 @@ import (
 var ctx = context.Background()
 
 // Used to run background BhavCopy Extraction operations
-type DownloadCSV struct {
-	RDB redis.Client
+type BhvcpyExtractor struct {
+	RDB      redis.Client
+	holidays []time.Time
 }
 
-func NewDownloader(host string) *DownloadCSV {
-	return &DownloadCSV{
-		RDB: *redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0}),
+func NewExtractor(host string) *BhvcpyExtractor {
+	resp, err := http.Get("https://zerodha.com/marketintel/holiday-calendar/?format=xml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	rdb := *redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0})
+	if resp.StatusCode != 200 {
+		return &BhvcpyExtractor{
+			RDB:      rdb,
+			holidays: make([]time.Time, 0),
+		}
+	}
+
+	// TODO: Fix XML extraction
+	// decoder := xml.NewDecoder(resp.Body)
+	// type Day struct {
+	// 	title       string
+	// 	description string
+	// 	link        string
+	// 	guid        string
+	// 	pubDate     string
+	// }
+	// var days []Day
+	// decoder.Decode(&days)
+
+	var holidays []time.Time
+	// for _, day := range days {
+	// 	day, err := time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", day.pubDate)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	holidays = append(holidays, day)
+	// }
+
+	return &BhvcpyExtractor{
+		RDB:      rdb,
+		holidays: holidays,
 	}
 }
 
 // Clear out old data from redis
-func (d *DownloadCSV) Clear() {
+func (d *BhvcpyExtractor) Clear() {
 	var names []string
 	len, err := d.RDB.LLen(ctx, "name").Result()
 	if err != nil {
@@ -57,7 +94,7 @@ func (d *DownloadCSV) Clear() {
 }
 
 // Add new data into redis
-func (d *DownloadCSV) Push(values []string) {
+func (d *BhvcpyExtractor) Push(values []string) {
 	if err := d.RDB.LPush(ctx, "name", values[1]).Err(); err != nil {
 		log.Fatal(err)
 	}
@@ -74,12 +111,25 @@ func (d *DownloadCSV) Push(values []string) {
 	}
 }
 
+func Find(slice []time.Time, val time.Time) bool {
+	for _, item := range slice {
+		if item.Format("01-02-2006") == val.Format("01-02-2006") {
+			return true
+		}
+	}
+	return false
+}
+
 // Download latest Bhavcopy and extract into Redis
-func (d *DownloadCSV) BhvcpyDownloader(date time.Time) {
+func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 	// Exit without downloading if today is a holiday, i.e. Saturday/Sunday
 	switch date.Weekday() {
 	case time.Saturday, time.Sunday:
 		return
+	default:
+		if Find(d.holidays, date) {
+
+		}
 	}
 
 	// Download Zip into 'tmp.zip' file
