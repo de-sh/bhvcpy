@@ -4,8 +4,10 @@ import (
 	"archive/zip"
 	"context"
 	"encoding/csv"
+	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -18,11 +20,13 @@ import (
 var ctx = context.Background()
 
 // Used to run background BhavCopy Extraction operations
+//
 type BhvcpyExtractor struct {
 	RDB      redis.Client
 	holidays []time.Time
 }
 
+// Constructs a new BhvcpyExtractor instance by parsing infromation from the holiday-calendar.
 func NewExtractor(host string) *BhvcpyExtractor {
 	resp, err := http.Get("https://zerodha.com/marketintel/holiday-calendar/?format=xml")
 	if err != nil {
@@ -30,37 +34,49 @@ func NewExtractor(host string) *BhvcpyExtractor {
 	}
 	defer resp.Body.Close()
 
-	rdb := *redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0})
+	rdb := redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0})
 	if resp.StatusCode != 200 {
+		// Use regular constructor if holiday-calendar unavailable.
 		return &BhvcpyExtractor{
-			RDB:      rdb,
+			RDB:      *rdb,
 			holidays: make([]time.Time, 0),
 		}
 	}
 
-	// TODO: Fix XML extraction
-	// decoder := xml.NewDecoder(resp.Body)
-	// type Day struct {
-	// 	title       string
-	// 	description string
-	// 	link        string
-	// 	guid        string
-	// 	pubDate     string
-	// }
-	// var days []Day
-	// decoder.Decode(&days)
+	// Structures used in holiday-calendar xml
+	type Item struct {
+		XMLName xml.Name `xml:"item"`
+		PubDate string   `xml:"pubDate"`
+	}
 
+	type Channel struct {
+		XMLName xml.Name `xml:"channel"`
+		Items   []Item   `xml:"item"`
+	}
+
+	type Rss struct {
+		XMLName xml.Name `xml:"rss"`
+		Channel Channel  `xml:"channel"`
+	}
+
+	// Byte stream read from response
+	rssStream, _ := ioutil.ReadAll(resp.Body)
+
+	days := Rss{}
+	xml.Unmarshal(rssStream, &days)
+
+	// Convert into easily usable date format
 	var holidays []time.Time
-	// for _, day := range days {
-	// 	day, err := time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", day.pubDate)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	holidays = append(holidays, day)
-	// }
+	for _, day := range days.Channel.Items {
+		day, err := time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", day.PubDate)
+		if err != nil {
+			log.Fatal(err)
+		}
+		holidays = append(holidays, day)
+	}
 
 	return &BhvcpyExtractor{
-		RDB:      rdb,
+		RDB:      *rdb,
 		holidays: holidays,
 	}
 }
@@ -128,7 +144,7 @@ func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 		return
 	default:
 		if Find(d.holidays, date) {
-
+			return
 		}
 	}
 
