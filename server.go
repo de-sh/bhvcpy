@@ -17,7 +17,20 @@ import (
 var ctx = context.Background()
 
 func queryRedis(w http.ResponseWriter, r *http.Request) {
-	key := strings.ToUpper(r.URL.Query().Get("key"))
+	// Parse JSON from POST for key
+	decoder := json.NewDecoder(r.Body)
+
+	type Data struct {
+		Key string
+	}
+
+	var d Data
+	err := decoder.Decode(&d)
+	if err != nil {
+		panic(err)
+	}
+	key := strings.ToUpper(d.Key)
+
 	// Connect to redis instance
 	conn := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
 
@@ -69,8 +82,16 @@ func main() {
 	defer c.Stop()
 
 	// Add handlers to serve `/` and `/get`
-	http.Handle("/", http.FileServer(http.Dir("./static")))
-	http.HandleFunc("/get", queryRedis)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			http.ServeFile(w, r, "./static/index.html")
+		case "POST":
+			queryRedis(w, r)
+		}
+
+	})
+
 	fmt.Println("Server listening on port 3000")
 
 	log.Panic(

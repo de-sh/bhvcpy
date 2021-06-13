@@ -94,11 +94,13 @@
 
     <footer class="text-center">Copyright: Devdutt Shenoi Version: 0.0.1</footer>
     <script>
-        async function getEntries(url, method, data) {
+        async function getEntries(url, method, key) {
             return await axios({
                 method: method,
                 url: url,
-                data: data,
+                data: {
+                    key: key
+                },
                 xsrfCookieName: 'csrftoken',
                 xsrfHeaderName: 'X-CSRFToken',
                 headers: {
@@ -121,7 +123,7 @@
                 }, ]
             },
             created() {
-                getEntries('/get?key=', 'get', '').then((res) => {
+                getEntries('/', 'post', '').then((res) => {
                     this.entries = res.data.entries;
                 });
             },
@@ -132,7 +134,7 @@
             },
             methods: {
                 backendSearch() {
-                    getEntries('/get?key='+this.keyword, 'get', '').then((res) => {
+                    getEntries('/', 'post', this.keyword).then((res) => {
                         this.entries = res.data.entries;
                     });
                 },
