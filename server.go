@@ -16,6 +16,9 @@ import (
 
 var ctx = context.Background()
 
+// Connect to redis instance
+var conn = redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
+
 func queryRedis(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON from POST for key
 	decoder := json.NewDecoder(r.Body)
@@ -30,9 +33,6 @@ func queryRedis(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	key := strings.ToUpper(d.Key)
-
-	// Connect to redis instance
-	conn := redis.NewClient(&redis.Options{Addr: "localhost:6379", Password: "", DB: 0})
 
 	// Find length of list
 	nos, err := conn.LLen(ctx, "name").Result()

@@ -18,27 +18,26 @@ import (
 )
 
 var ctx = context.Background()
+var db *redis.Client
 
 // Used to run background BhavCopy Extraction operations
-//
 type BhvcpyExtractor struct {
-	RDB      redis.Client
 	holidays []time.Time
 }
 
 // Constructs a new BhvcpyExtractor instance by parsing infromation from the holiday-calendar.
 func NewExtractor(host string) *BhvcpyExtractor {
+	db = redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0})
+
 	resp, err := http.Get("https://zerodha.com/marketintel/holiday-calendar/?format=xml")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
 
-	rdb := redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0})
 	if resp.StatusCode != 200 {
 		// Use regular constructor if holiday-calendar unavailable.
 		return &BhvcpyExtractor{
-			RDB:      *rdb,
 			holidays: make([]time.Time, 0),
 		}
 	}
@@ -76,55 +75,24 @@ func NewExtractor(host string) *BhvcpyExtractor {
 	}
 
 	return &BhvcpyExtractor{
-		RDB:      *rdb,
 		holidays: holidays,
 	}
 }
 
-// Clear out old data from redis
-func (d *BhvcpyExtractor) Clear() {
-	var names []string
-	len, err := d.RDB.LLen(ctx, "name").Result()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for i := int64(0); i < len; i++ {
-		name, err := d.RDB.LIndex(ctx, "name", i).Result()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		names = append(names, name)
-	}
-
-	if err := d.RDB.Del(ctx, "name").Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	for _, name := range names {
-		if err := d.RDB.Del(ctx, name).Err(); err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
 // Add new data into redis
-func (d *BhvcpyExtractor) Push(values []string) {
-	if err := d.RDB.LPush(ctx, "name", values[1]).Err(); err != nil {
+func Push(pipe redis.Pipeliner, values []string) {
+	if err := pipe.LPush(ctx, "name", values[1]).Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := d.RDB.HMSet(ctx, values[1],
+	pipe.HMSet(ctx, values[1],
 		"code", values[0],
 		"name", values[1],
 		"open", values[4],
 		"high", values[5],
 		"low", values[6],
 		"close", values[7],
-	).Err(); err != nil {
-		log.Fatal(err)
-	}
+	)
 }
 
 func Find(slice []time.Time, val time.Time) bool {
@@ -188,13 +156,17 @@ func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 	}
 
 	// Clear out old data
-	d.Clear()
+	db.FlushDB(ctx)
 
 	// Push in fresh data from CSV
+	pipe := db.TxPipeline()
 	for i, row := range lines {
 		if i != 0 {
-			d.Push(row)
+			Push(pipe, row)
 		}
+	}
+	if _, err := pipe.Exec(ctx); err != nil {
+		log.Fatal(err)
 	}
 
 	fmt.Println("BhavCopy has been updated on", date)
