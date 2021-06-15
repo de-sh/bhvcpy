@@ -18,6 +18,7 @@ import (
 )
 
 var ctx = context.Background()
+var temp_folder string
 
 // Used to run background BhavCopy Extraction operations
 type BhvcpyExtractor struct {
@@ -27,6 +28,9 @@ type BhvcpyExtractor struct {
 
 // Constructs a new BhvcpyExtractor instance by parsing infromation from the holiday-calendar.
 func NewExtractor(db *redis.Client) *BhvcpyExtractor {
+	// Set folder to be used for temporary file storage
+	temp_folder = os.Getenv("BHVCPY_TEMP")
+
 	resp, err := http.Get("https://zerodha.com/marketintel/holiday-calendar/?format=xml")
 	if err != nil {
 		log.Fatal(err)
@@ -128,7 +132,12 @@ func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 		return
 	}
 
-	temp := "tmp.zip"
+	// Ensure temporary folder exists or create it
+	if err := os.MkdirAll(temp_folder, 0755); err != nil {
+		log.Fatal(err)
+	}
+
+	temp := filepath.Join(temp_folder, "tmp.zip")
 	out, err := os.Create(temp)
 	if err != nil {
 		log.Fatal(err)
@@ -140,11 +149,11 @@ func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 		log.Fatal(err)
 	}
 
-	// Extract 'tmp.zip'
+	// Extract CSV from zip file
 	Unzip(temp)
 
 	// Open CSV file
-	f, err := os.Open("./tmp/" + file_str + ".CSV")
+	f, err := os.Open(filepath.Join(temp_folder, file_str+".CSV"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,19 +181,15 @@ func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 	fmt.Println("BhavCopy has been updated on", date)
 }
 
-// Unzip into local `./tmp`
+// Unzip into local temporary folder
 func Unzip(path string) {
 	reader, err := zip.OpenReader(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := os.MkdirAll("./tmp", 0755); err != nil {
-		log.Fatal(err)
-	}
-
 	for _, file := range reader.File {
-		path := filepath.Join("./tmp", file.Name)
+		path := filepath.Join(temp_folder, file.Name)
 		if file.FileInfo().IsDir() {
 			os.MkdirAll(path, file.Mode())
 			continue

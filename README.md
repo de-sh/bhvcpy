@@ -13,9 +13,9 @@
 ```
 redis-server
 ```
-3. Start golang server
+3. Set tempory folder path and start golang server
 ```
-go run server.go
+BHVCPY_TEMP="./tmp" go run server.go
 ```
 4. Visit http://localhost:3000 and interact with website. Input a keyword to get values as initially it is empty, this is similarly empty if redis hasn't been updated by the Bhavcopy downloader task.
 5. Close website and redis instances.
