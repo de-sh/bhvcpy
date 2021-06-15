@@ -18,17 +18,15 @@ import (
 )
 
 var ctx = context.Background()
-var db *redis.Client
 
 // Used to run background BhavCopy Extraction operations
 type BhvcpyExtractor struct {
 	holidays []time.Time
+	db       *redis.Client
 }
 
 // Constructs a new BhvcpyExtractor instance by parsing infromation from the holiday-calendar.
-func NewExtractor(host string) *BhvcpyExtractor {
-	db = redis.NewClient(&redis.Options{Addr: host, Password: "", DB: 0})
-
+func NewExtractor(db *redis.Client) *BhvcpyExtractor {
 	resp, err := http.Get("https://zerodha.com/marketintel/holiday-calendar/?format=xml")
 	if err != nil {
 		log.Fatal(err)
@@ -39,6 +37,7 @@ func NewExtractor(host string) *BhvcpyExtractor {
 		// Use regular constructor if holiday-calendar unavailable.
 		return &BhvcpyExtractor{
 			holidays: make([]time.Time, 0),
+			db:       db,
 		}
 	}
 
@@ -76,16 +75,17 @@ func NewExtractor(host string) *BhvcpyExtractor {
 
 	return &BhvcpyExtractor{
 		holidays: holidays,
+		db:       db,
 	}
 }
 
 // Add new data into redis
-func Push(pipe redis.Pipeliner, values []string) {
-	if err := pipe.LPush(ctx, "name", values[1]).Err(); err != nil {
+func Push(pipe *redis.Pipeliner, values []string) {
+	if err := (*pipe).LPush(ctx, "name", values[1]).Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	pipe.HMSet(ctx, values[1],
+	(*pipe).HMSet(ctx, values[1],
 		"code", values[0],
 		"name", values[1],
 		"open", values[4],
@@ -156,13 +156,13 @@ func (d *BhvcpyExtractor) BhvcpyDownloader(date time.Time) {
 	}
 
 	// Clear out old data
-	db.FlushDB(ctx)
+	d.db.FlushDB(ctx)
 
 	// Push in fresh data from CSV
-	pipe := db.TxPipeline()
+	pipe := d.db.TxPipeline()
 	for i, row := range lines {
 		if i != 0 {
-			Push(pipe, row)
+			Push(&pipe, row)
 		}
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
