@@ -34,23 +34,10 @@ func queryRedis(w http.ResponseWriter, r *http.Request) {
 	}
 	key := strings.ToUpper(d.Key)
 
-	// Find length of list
-	nos, err := conn.LLen(ctx, "name").Result()
+	// Scans set of names for keyword
+	names, _, err := conn.SScan(ctx, "names", 0, key+"*", 10000).Result()
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	// Recieve names
-	var names []string
-	for code := nos - 1; code >= 0; code-- {
-		name, err := conn.LIndex(ctx, "name", code).Result()
-		if err != nil {
-			log.Fatal(err)
-		} else {
-			if strings.Contains(name, key) {
-				names = append(names, name)
-			}
-		}
 	}
 
 	// Recieve entries associated with selected names

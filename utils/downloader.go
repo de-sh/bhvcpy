@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -85,13 +86,14 @@ func NewExtractor(db *redis.Client) *BhvcpyExtractor {
 
 // Add new data into redis
 func Push(pipe *redis.Pipeliner, values []string) {
-	if err := (*pipe).LPush(ctx, "name", values[1]).Err(); err != nil {
+	name := strings.Trim(values[1], " ")
+	if err := (*pipe).SAdd(ctx, "names", name).Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	(*pipe).HMSet(ctx, values[1],
+	(*pipe).HMSet(ctx, name,
 		"code", values[0],
-		"name", values[1],
+		"name", name,
 		"open", values[4],
 		"high", values[5],
 		"low", values[6],
